@@ -49,7 +49,7 @@ class WP_to_Grav_Exporter {
     
     private function generate_export_files() {
         $upload_dir = wp_upload_dir();
-        $export_dir = trailingslashit($upload_dir['basedir']) . 'grav-export/';
+        $export_dir = trailingslashit($upload_dir['basedir']) . 'grav-expor/';
 
         if (!is_dir($export_dir)) {
             mkdir($export_dir, 0755, true);
@@ -91,7 +91,8 @@ class WP_to_Grav_Exporter {
 
             $meta = array(
                 'title' => $post->post_title,
-                'date' => $post->post_date,
+                'date' => 2020-01-01 12:00
+                taxonomy: 
                 'categories' => $categories,
                 'tags' => wp_get_post_tags($post->ID, array('fields' => 'names')),
             );

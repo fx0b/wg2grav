@@ -69,24 +69,40 @@ class WP_to_Grav_Exporter {
     }
 
     private function export_post($post, $export_dir) {
-        $post_dir = $export_dir . sanitize_title($post->post_title) . '/';
-        
-        if (!is_dir($post_dir)) {
-            mkdir($post_dir, 0755, true);
+        $categories = wp_get_post_categories($post->ID, array('fields' => 'names'));
+
+        // If the post has no categories, place it in an 'uncategorized' folder
+        if (empty($categories)) {
+            $categories = array('uncategorized');
         }
 
-        $meta = array(
-            'title' => $post->post_title,
-            'date' => $post->post_date,
-            'categories' => wp_get_post_categories($post->ID, array('fields' => 'names')),
-            'tags' => wp_get_post_tags($post->ID, array('fields' => 'names')),
-        );
+        foreach ($categories as $category) {
+            $category_dir = $export_dir . sanitize_title($category) . '/';
+            
+            if (!is_dir($category_dir)) {
+                mkdir($category_dir, 0755, true);
+            }
 
-        $meta_file = $post_dir . 'post.md';
-        $content_file = $post_dir . 'default.md';
+            $post_dir = $category_dir . sanitize_title($post->post_title) . '/';
+            
+            if (!is_dir($post_dir)) {
+                mkdir($post_dir, 0755, true);
+            }
 
-        file_put_contents($meta_file, $this->generate_yaml_front_matter($meta));
-        file_put_contents($content_file, $post->post_content);
+            $meta = array(
+                'title' => $post->post_title,
+                'date' => $post->post_date,
+                'categories' => $categories,
+                'tags' => wp_get_post_tags($post->ID, array('fields' => 'names')),
+            );
+
+            $meta_content = $this->generate_yaml_front_matter($meta);
+            $post_content = $post->post_content;
+
+            $item_file = $post_dir . 'item.md';
+
+            file_put_contents($item_file, $meta_content . "\n" . $post_content);
+        }
     }
 
     private function generate_yaml_front_matter($meta) {
@@ -138,3 +154,4 @@ class WP_to_Grav_Exporter {
 }
 
 new WP_to_Grav_Exporter();
+?>
